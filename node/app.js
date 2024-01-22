@@ -1,10 +1,12 @@
 const express = require('express');
 const cors = require('cors'); // Add this line
+const bodyParser = require('body-parser');
 
 const app = express();
 const port = 3000;
-
 app.use(cors()); // Add this line to enable CORS
+app.use(bodyParser.json()); // Add this line for JSON parsing
+
 app.use(express.static('public'));
 // Sử dụng require để nhập dữ liệu từ file data.js
 const { categories, sizes, recipes, users ,getCategoryById, getCategoryName, getRecipes, getNumberOfRecipes, getRecipesByCategoryName, getRecipeById } = require('./data');
@@ -26,6 +28,10 @@ app.get('/api/categories', (req, res) => {
 // Endpoint để trả về dữ liệu sizes
 app.get('/api/sizes', (req, res) => {
     res.json(sizes);
+});
+
+app.get('/api/users', (req, res) => {
+    res.json(users);
 });
 
 // Endpoint để trả về dữ liệu recipes
@@ -110,7 +116,57 @@ app.get('/api/users/:userId', (req, res) => {
       res.status(404).json({ error: 'User not found' });
     }
 });
-  
+app.post('/api/users', (req, res) => {
+    const { username, password } = req.body || {};
+
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Vui lòng nhập tên người dùng và mật khẩu' });
+    }
+
+    // Kiểm tra xem tên người dùng đã tồn tại chưa
+    const existingUser = users.find(user => user.username === username);
+    if (existingUser) {
+        return res.status(400).json({ error: 'Tên người dùng đã tồn tại' });
+    }
+
+    // Tạo người dùng mới
+    const newUser = {
+        id: users.length + 1,
+        username,
+        password,
+    };
+
+    // Thêm người dùng mới vào danh sách người dùng
+    users.push(newUser);
+
+    res.json({ message: 'Đăng ký thành công', user: newUser });
+});
+
+app.get('/api/users', (req, res) => {
+    const { username, password } = req.body || {};
+
+    if (!username || !password) {
+        return res.status(400).json({ error: 'Vui lòng nhập tên người dùng và mật khẩu' });
+    }
+
+    // Kiểm tra xem tên người dùng đã tồn tại chưa
+    const existingUser = users.find(user => user.username === username);
+    if (existingUser) {
+        return res.status(400).json({ error: 'Tên người dùng đã tồn tại' });
+    }
+
+    // Tạo người dùng mới
+    const newUser = {
+        id: users.length + 1,
+        username,
+        password,
+    };
+
+    // Thêm người dùng mới vào danh sách người dùng
+    users.push(newUser);
+
+    res.json({ message: 'Đăng ký thành công', user: newUser });
+});
 app.listen(port, () => {
     console.log(`Server is running at http://localhost:${port}`);
 });
